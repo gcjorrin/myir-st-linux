@@ -649,3 +649,27 @@
         };
     };
 };
+
+&i2c3 {
+        pinctrl-names = "default", "sleep";
+        i2c-scl-rising-time-ns = <100>;
+        i2c-scl-falling-time-ns = <7>;
+        status = "okay";
+        /delete-property/dmas;
+        /delete-property/dma-names;
+
+        touchscreen@38 {
+              compatible ="edt,edt-ft5x06";
+              reg = <0x38>;
+
+              interrupt-parent = <&gpioi>;
+              interrupts = <7  IRQ_TYPE_EDGE_FALLING>;
+              interrupt-controller;
+              touchscreen-size-x = <800>;
+              touchscreen-size-y = <480>;
+
+              reset-gpios = <&gpioi 2 GPIO_ACTIVE_LOW>;
+              status = "okay";
+      };
+
+};
