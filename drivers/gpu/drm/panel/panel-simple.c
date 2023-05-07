@@ -3669,14 +3669,14 @@ static const struct display_timing myir_070tft_timing = {
 static const struct panel_desc myir_070tft = {
        .timings = &myir_070tft_timing,
        .num_timings = 1,
-       .bpc = 6,
+       .bpc = 8,
        .size =
        {
            .width = 154,
            .height = 86,
        },
        .bus_flags = DRM_BUS_FLAG_DE_HIGH,
-       .bus_format = MEDIA_BUS_FMT_RGB888_1X7X4_SPWG,
+       .bus_format = MEDIA_BUS_FMT_RGB888_1X24,
        .connector_type = DRM_MODE_CONNECTOR_DPI,
 };
 
@@ -4955,13 +4955,13 @@ static const struct of_device_id platform_of_match[] = {
 		.compatible = "yes-optoelectronics,ytc700tlag-05-201c",
 		.data = &yes_optoelectronics_ytc700tlag_05_201c,
 	}, {
+		.compatible = "myir,070tft-7",
+                .data = &myir_070tft,
+	},{
 		/* Must be the last entry */
 		.compatible = "panel-dpi",
 		.data = &panel_dpi,
 	}, {
-        .compatible = "myir,070tft-7",
-        .data = &myir_070tft,
-    },{
 		/* sentinel */
 	}
 };

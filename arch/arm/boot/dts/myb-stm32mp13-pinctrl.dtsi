@@ -180,6 +180,7 @@
 					<STM32_PINMUX('D',  15, AF14)>, /* LCD_B5 */
 					<STM32_PINMUX('D',  1, AF11)>,  /* LCD_B6 */
 					<STM32_PINMUX('E',  15, AF14)>, /* LCD_B7 */
+					<STM32_PINMUX('E',  11, AF9)>,   /* LCD_R0 */
 					<STM32_PINMUX('G',  7, AF11)>,   /* LCD_R1 */
 					<STM32_PINMUX('H',  10, AF14)>,  /* LCD_R2 */
 					<STM32_PINMUX('B',  12, AF13)>,  /* LCD_R3 */
@@ -191,7 +192,7 @@
 					<STM32_PINMUX('F', 1, AF14)>,   /* LCD_G1 */
 					<STM32_PINMUX('H', 13, AF14)>,   /* LCD_G2 */
 					<STM32_PINMUX('F', 3, AF14)>,   /* LCD_G3 */
-					<STM32_PINMUX('F', 2, AF14)>,   /* LCD_G4 */
+					<STM32_PINMUX('F', 2, AF13)>,   /* LCD_G4 */
 					<STM32_PINMUX('G', 0, AF14)>,   /* LCD_G5 */
 					<STM32_PINMUX('E', 12, AF14)>,   /* LCD_G6 */
 					<STM32_PINMUX('A', 15, AF11)>;   /* LCD_G7 */
