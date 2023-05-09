@@ -82,16 +82,11 @@
 	};
 
 	/*LCD Panel*/
-	panel {
+	panel_ltdc_rgb: panel_ltdc_rgb{
 			compatible = "myir,070tft-7";
-			pinctrl-names = "default", "sleep";
-			pinctrl-0 = <&ltdc_pins_a>;
-			pinctrl-1 = <&ltdc_sleep_pins_a>;
-
 			power-supply = <&v3v3_panle>;
 			enable-gpios = <&gpioa 11 GPIO_ACTIVE_HIGH>;
 			reset-gpios = <&gpioi 0 GPIO_ACTIVE_HIGH>;
-
 			//interrupts = <3 IRQ_TYPE_EDG
 			//backlight = <&panel_backlight>;
 			status = "okay";
@@ -101,6 +96,24 @@
 					};
 			};
 	};
+
+    v3v3_hdmi: regulator-v3v3-hdmi {
+        compatible = "regulator-fixed";
+        regulator-name = "v3v3_hdmi";
+        regulator-min-microvolt = <3300000>;
+        regulator-max-microvolt = <3300000>;
+        regulator-always-on;
+        regulator-boot-on;
+    };
+
+    v1v2_hdmi: regulator-v1v2-hdmi {
+        compatible = "regulator-fixed";
+        regulator-name = "v1v2_hdmi";
+        regulator-min-microvolt = <1200000>;
+        regulator-max-microvolt = <1200000>;
+        regulator-always-on;
+        regulator-boot-on;
+    };
 
 	vdd_usb: reg-vdd_usb {
 		compatible = "regulator-fixed";
@@ -340,13 +353,14 @@
 
 &ltdc {
 	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&ltdc_pins_a>;
+	pinctrl-1 = <&ltdc_sleep_pins_a>;
 	status = "okay";
 	port {
 		#address-cells = <1>;
 		#size-cells = <0>;
 
-		ltdc_out_rgb: endpoint@0 {
-				reg = <0>;
+		ltdc_out_rgb: endpoint {
 				remote-endpoint = <&panel_in_rgb>;
 		};
 	};
@@ -565,7 +579,6 @@
 				link-frequencies = /bits/ 64 <70000000>;
 				// pclk-max-frequency = <24000000>;
 			};
-
 		};
 	};
 
@@ -586,10 +599,9 @@
                 sgtl5000_endpoint: endpoint {
 					remote-endpoint = <&i2s1_endpoint>;
                 };
-		   };
+			};
 		};
 	};
-
 
 };
 

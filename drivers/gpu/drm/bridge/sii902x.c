@@ -177,6 +177,7 @@ struct sii902x {
 	struct i2c_mux_core *i2cmux;
 	struct regulator_bulk_data supplies[2];
 	struct edid *edid;
+	u32 hdmi_mode;
 	/*
 	 * Mutex protects audio and video functions from interfering
 	 * each other, by keeping their i2c command sequences atomic.
@@ -188,6 +189,32 @@ struct sii902x {
 		u32 i2s_fifo_sequence[4];
 	} audio;
 };
+
+static const struct drm_display_mode default_mode[] =
+{
+	/* 4 - 1280x720@60Hz 16:9 */
+	{ DRM_MODE("1280x720", DRM_MODE_TYPE_DRIVER, 74250, 1280, 1390,
+		   1430, 1650, 0, 720, 725, 730, 750, 0,
+		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC),
+	  .picture_aspect_ratio = HDMI_PICTURE_ASPECT_16_9, },
+	/* 19 - 1280x720@50Hz 16:9 */
+	{ DRM_MODE("1280x720", DRM_MODE_TYPE_DRIVER, 74250, 1280, 1720,
+		   1760, 1980, 0, 720, 725, 730, 750, 0,
+		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC),
+	  .picture_aspect_ratio = HDMI_PICTURE_ASPECT_16_9, },
+	/* 0x10 - 1024x768@60Hz */
+	{ DRM_MODE("1024x768", DRM_MODE_TYPE_DRIVER, 65000, 1024, 1048,
+		   1184, 1344, 0,  768, 771, 777, 806, 0,
+		   DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC) },
+	/* 31 - 1920x1080@50Hz 16:9 */
+	{ DRM_MODE("1920x1080", DRM_MODE_TYPE_DRIVER, 148500, 1920, 2448,
+		   2492, 2640, 0, 1080, 1084, 1089, 1125, 0,
+		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC),
+	  .picture_aspect_ratio = HDMI_PICTURE_ASPECT_16_9, },
+
+};
+
+
 
 static int sii902x_read_unlocked(struct i2c_client *i2c, u8 reg, u8 *val)
 {
@@ -282,22 +309,28 @@ static int sii902x_get_modes(struct drm_connector *connector)
 	struct sii902x *sii902x = connector_to_sii902x(connector);
 	u32 bus_format = MEDIA_BUS_FMT_RGB888_1X24;
 	u8 output_mode = SII902X_SYS_CTRL_OUTPUT_DVI;
-	struct edid *edid;
-	int num = 0, ret;
+	struct edid *edid=NULL;
+	int num = 0, ret = 0;
+	struct drm_display_mode *mode;
 
 	mutex_lock(&sii902x->mutex);
-
-	kfree(sii902x->edid);
-	sii902x->edid = NULL;
-	edid = drm_get_edid(connector, sii902x->i2cmux->adapter[0]);
-	drm_connector_update_edid_property(connector, edid);
 	if (edid) {
+		drm_connector_update_edid_property(connector, edid);
 		if (drm_detect_hdmi_monitor(edid))
 			output_mode = SII902X_SYS_CTRL_OUTPUT_HDMI;
 
 		num = drm_add_edid_modes(connector, edid);
-		sii902x->edid = edid;
+		kfree(edid);
+	} 
+	else { 
+			mode=  sii902x->hdmi_mode>ARRAY_SIZE(default_mode)?  \
+				drm_mode_duplicate(connector->dev, &default_mode[0]): drm_mode_duplicate(connector->dev, &default_mode[sii902x->hdmi_mode]);
+			if(mode) mode->type = DRM_MODE_TYPE_PREFERRED;
+			drm_mode_probed_add(connector, mode);
+			output_mode = SII902X_SYS_CTRL_OUTPUT_HDMI;
+			num++;
 	}
+	
 
 	ret = drm_display_info_set_bus_formats(&connector->display_info,
 					       &bus_format, 1);
@@ -1082,6 +1115,8 @@ static int sii902x_probe(struct i2c_client *client,
 			PTR_ERR(sii902x->reset_gpio));
 		return PTR_ERR(sii902x->reset_gpio);
 	}
+
+	of_property_read_u32(dev->of_node, "hdmi_mode", &sii902x->hdmi_mode);
 
 	mutex_init(&sii902x->mutex);
 
