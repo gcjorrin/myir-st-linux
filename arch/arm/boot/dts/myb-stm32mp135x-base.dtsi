@@ -466,6 +466,7 @@
 	phy-names = "usb2-phy";
 	usb-role-switch;
 	dr_mode = "otg";
+	role-switch-default-mode = "peripheral";
 	// hnp-disable;
 	// srp-disable;
 	// adp-disable;

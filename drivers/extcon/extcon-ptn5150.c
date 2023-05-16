@@ -17,6 +17,9 @@
 #include <linux/slab.h>
 #include <linux/extcon-provider.h>
 #include <linux/gpio/consumer.h>
+#include <linux/usb/role.h>
+#include <linux/extcon.h>
+
 
 /* PTN5150 registers */
 #define PTN5150_REG_DEVICE_ID			0x01
@@ -52,6 +55,7 @@ struct ptn5150_info {
 	int irq;
 	struct work_struct irq_work;
 	struct mutex mutex;
+	struct usb_role_switch	*role_sw;
 };
 
 /* List of detectable cables */
@@ -85,6 +89,7 @@ static void ptn5150_check_state(struct ptn5150_info *info)
 		extcon_set_state_sync(info->edev, EXTCON_USB_HOST, false);
 		gpiod_set_value_cansleep(info->vbus_gpiod, 0);
 		extcon_set_state_sync(info->edev, EXTCON_USB, true);
+		usb_role_switch_set_role(info->role_sw, USB_ROLE_DEVICE);
 		break;
 	case PTN5150_UFP_ATTACHED:
 		extcon_set_state_sync(info->edev, EXTCON_USB, false);
@@ -95,6 +100,7 @@ static void ptn5150_check_state(struct ptn5150_info *info)
 			gpiod_set_value_cansleep(info->vbus_gpiod, 1);
 
 		extcon_set_state_sync(info->edev, EXTCON_USB_HOST, true);
+		usb_role_switch_set_role(info->role_sw, USB_ROLE_HOST);
 		break;
 	default:
 		break;
@@ -106,12 +112,25 @@ static void ptn5150_irq_work(struct work_struct *work)
 	struct ptn5150_info *info = container_of(work,
 			struct ptn5150_info, irq_work);
 	int ret = 0;
+	unsigned int val;
 	unsigned int int_status;
+	struct fwnode_handle *fwnode;
 
 	if (!info->edev)
 		return;
 
 	mutex_lock(&info->mutex);
+
+	if(info->role_sw == NULL){
+		fwnode = device_get_named_child_node(info->dev, "connector");
+		info->role_sw = fwnode_usb_role_switch_get(fwnode);
+		if (IS_ERR(info->role_sw)) {
+				ret = PTR_ERR(info->role_sw);
+				if (ret != -EPROBE_DEFER)
+					dev_err(info->dev,"Failed to get usb role switch: %d\n", ret);
+				//return ret;
+			}
+	}
 
 	/* Clear interrupt. Read would clear the register */
 	ret = regmap_read(info->regmap, PTN5150_REG_INT_STATUS, &int_status);
