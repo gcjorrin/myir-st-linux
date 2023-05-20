@@ -1505,6 +1505,10 @@ static int sgtl5000_probe(struct snd_soc_component *component)
 	 */
 	snd_soc_component_write(component, SGTL5000_DAP_AUDIO_EQ, SGTL5000_DAP_SEL_GEQ);
 
+	snd_soc_component_write(component, SGTL5000_CHIP_DAC_VOL, 0x3C3C);    // Sset PCM Playback Volume
+	snd_soc_component_write(component, SGTL5000_CHIP_MIC_CTRL, 0x0203);   // Sset Mic Volume
+	snd_soc_component_write(component, SGTL5000_CHIP_MIC_CTRL, 0x00ff);   // Sset Capture  Volume
+
 	/* Unmute DAC after start */
 	snd_soc_component_update_bits(component, SGTL5000_CHIP_ADCDAC_CTRL,
 		SGTL5000_DAC_MUTE_LEFT | SGTL5000_DAC_MUTE_RIGHT, 0);
