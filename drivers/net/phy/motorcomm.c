@@ -1586,6 +1586,27 @@ static int yt8521_resume(struct phy_device *phydev)
 	return 0;
 }
 
+static int yt8531_delay_init(struct phy_device *phydev)
+{
+	int ret;
+	int val = 0;
+	struct device_node *np;
+
+	np = phydev->mdio.dev.of_node;
+	if (!np ){
+		netdev_info(phydev->attached_dev,"No platform data");
+		return -ENODEV;
+	}
+	ret = of_property_read_u32(np,"ytphy_delay_cfg",&val);
+	if(ret){
+		netdev_info(phydev->attached_dev,"failed to read ytphy_delay_cfg");
+		return ret;
+	}
+	netdev_info(phydev->attached_dev,"value is %x",val);
+	ret = ytphy_write_ext(phydev,0xa003,val);
+	return ret;
+
+}
 static int yt8531_led_init(struct phy_device *phydev)
 {
     int ret;
@@ -1596,11 +1617,11 @@ static int yt8531_led_init(struct phy_device *phydev)
 #endif
     //SyncE_CFG
     val = ytphy_read_ext(phydev, 0xA012);
-    printk("defautl SyncE_CFG val is %x",val);
+    netdev_info(phydev->attached_dev,"defautl SyncE_CFG val is %x",val);
     val &= ~(1<<6);
     ytphy_write_ext(phydev,0xA012,val);
     val = ytphy_read_ext(phydev, 0xA012);
-    printk("now SyncE_CFG val is %x",val);
+    netdev_info(phydev->attached_dev,"now SyncE_CFG val is %x",val);
     
 #if (KERNEL_VERSION(4, 5, 0) > LINUX_VERSION_CODE)
     netdev_info(phydev->attached_dev, "%s phy addr: %d.SyncE_CFG val is %x,disabled\n", __func__, phydev->addr,val);
@@ -1616,8 +1637,8 @@ static int yt8531_led_init(struct phy_device *phydev)
   	/* set when link up and speed is 10/100/1000 make led on  as link led */
 	val = 0x10f;
     ret = ytphy_write_ext(phydev, YT8521_EXTREG_LED1, val);
-    if (val < 0){
-		return val;
+    if (ret < 0){
+		return ret;
 	}
 
     val = ytphy_read_ext(phydev, YT8521_EXTREG_LED2);
@@ -1675,14 +1696,19 @@ static int yt8531S_config_init(struct phy_device *phydev)
 	ret = yt8521_config_init(phydev);
 	if (ret < 0)
         return ret;
-	ret = yt8531_led_init(phydev);
 
 #if (KERNEL_VERSION(4, 5, 0) > LINUX_VERSION_CODE)
     netdev_info(phydev->attached_dev, "%s do led init, phy addr: %d\n", __func__, phydev->addr);
 #else
     netdev_info(phydev->attached_dev, "%s do led init, phy addr: %d\n", __func__, phydev->mdio.addr);
 #endif
+	if ( yt8531_led_init(phydev) < 0){
+        netdev_info(phydev->attached_dev,"led init failed");
+	}
 
+	if (yt8531_delay_init(phydev) < 0){
+        netdev_info(phydev->attached_dev,"get ytphy delay cfg failed,assume dont need it");
+	}
 	return ret;
 }
 
