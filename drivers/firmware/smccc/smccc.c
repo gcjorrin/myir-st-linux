@@ -26,6 +26,7 @@ void __init arm_smccc_version_init(u32 version, enum arm_smccc_conduit conduit)
 
 	smccc_version = version;
 	smccc_conduit = conduit;
+	return;
 
 	smccc_trng_available = smccc_probe_trng();
 	if (IS_ENABLED(CONFIG_ARM64_SVE) &&
