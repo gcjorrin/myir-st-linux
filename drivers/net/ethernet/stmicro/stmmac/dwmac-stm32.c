@@ -23,6 +23,9 @@
 
 #include "stmmac_platform.h"
 
+#include <linux/of_mdio.h>
+#include <linux/of_gpio.h>
+
 /* CLOCK feed to PHY*/
 #define ETH_CK_F_25M	25000000
 #define ETH_CK_F_50M	50000000
@@ -104,6 +107,7 @@ struct stm32_dwmac {
 	u32 speed;
 	const struct stm32_ops *ops;
 	struct device *dev;
+	struct gpio_desc *phy_reset[2];
 };
 
 struct stm32_syscfg_pmcsetr {
@@ -483,6 +487,32 @@ static int phy_power_on(struct stm32_dwmac *bsp_priv, bool enable)
 	return 0;
 }
 
+static int stm32_dwmac_phy_reset(struct device *dev, struct stm32_dwmac *dwmac)
+{		int i=0;
+        int reset_delay_us=0,reset_deassert_us=0,num_reset_gpios=0;
+
+        of_property_read_u32(dev->of_node, "st,reset-assert-us", &reset_delay_us);
+        of_property_read_u32(dev->of_node, "st,reset-deassert-us", &reset_deassert_us);
+        of_property_read_u32(dev->of_node, "st,num_reset_gpios", &num_reset_gpios);
+
+		do{
+			dwmac->phy_reset[i] = devm_gpiod_get_index(dev, "st,phy-reset",i,GPIOD_OUT_HIGH);
+            if(!IS_ERR(dwmac->phy_reset[i]))
+            {
+				gpiod_direction_output(dwmac->phy_reset[i], GPIOD_OUT_HIGH);
+				gpiod_set_value_cansleep(dwmac->phy_reset[i], GPIOD_OUT_HIGH);
+				usleep_range(reset_deassert_us, reset_deassert_us);
+				gpiod_set_value_cansleep(dwmac->phy_reset[i], GPIOD_OUT_LOW);
+				usleep_range(reset_delay_us, reset_delay_us);
+				gpiod_set_value_cansleep(dwmac->phy_reset[i], GPIOD_OUT_HIGH);
+				dev_info(dev, "reset eth-phy \n");
+            }
+			i++;
+		}while(i<num_reset_gpios);
+
+        return 1;
+}
+
 static int stm32_dwmac_probe(struct platform_device *pdev)
 {
 	struct plat_stmmacenet_data *plat_dat;
@@ -520,6 +550,8 @@ static int stm32_dwmac_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "Unable to parse OF data\n");
 		goto err_remove_config_dt;
 	}
+
+	stm32_dwmac_phy_reset(&pdev->dev, dwmac);
 
 	if (stmmac_res.wol_irq && !dwmac->clk_eth_ck) {
 		ret = stm32_dwmac_wake_init(&pdev->dev, &stmmac_res);
