@@ -221,15 +221,30 @@
 		data-mapping = "vesa-24";
 
 		panel-timing {
-			clock-frequency = <63000000>;
+			// clock-frequency = <63000000>;
+			// hactive = <1280>;
+			// vactive = <800>;
+			// hfront-porch = <67>;
+			// hback-porch = <88>;
+			// hsync-len = <18>;
+			// vfront-porch = <27>;
+			// vback-porch = <23>;
+			// vsync-len = <10>;
+
+			clock-frequency = <70000000>;
 			hactive = <1280>;
+			hsync-len = <17>;
+			hback-porch = <60>;
+			hfront-porch = <60>;
 			vactive = <800>;
-			hfront-porch = <67>;
-			hback-porch = <88>;
-			hsync-len = <18>;
-			vfront-porch = <27>;
-			vback-porch = <23>;
-			vsync-len = <10>;
+			vsync-len = <3>;
+			vback-porch = <10>;
+			vfront-porch = <10>;
+
+			vsync-active = <0>;
+			hsync-active =<0>;
+			de-active =<0>;
+			pixelclk-active =<0>;
 		};
 
 		port {
