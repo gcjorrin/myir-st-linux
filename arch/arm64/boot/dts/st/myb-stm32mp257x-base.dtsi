@@ -286,6 +286,28 @@
 };
 
 &pinctrl{
+
+	fdcan1_pins_mx: fdcan1_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('B', 11, AF7)>; /* FDCAN1_RX */
+			bias-disable;
+			drive-push-pull;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('B', 9, AF7)>; /* FDCAN1_TX */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <0>;
+		};
+	};
+
+	fdcan1_sleep_pins_mx: fdcan1_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('B', 9, ANALOG)>, /* FDCAN1_TX */
+					 <STM32_PINMUX('B', 11, ANALOG)>; /* FDCAN1_RX */
+		};
+	};
+
 	i2c3_pins_a: i2c3-0 {
 		pins {
 			pinmux = <STM32_PINMUX('G', 1, AF9)>, /* I2C3_SCL */
@@ -568,7 +590,7 @@
 };
 
 &crc {
-	status = "disabled";
+	status = "okay";
 };
 
 
@@ -968,8 +990,8 @@
 
 &m_can1 {
 	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&m_can1_pins_a>;
-	pinctrl-1 = <&m_can1_sleep_pins_a>;
+	pinctrl-0 = <&fdcan1_pins_mx>;
+	pinctrl-1 = <&fdcan1_sleep_pins_mx>;
 	status = "okay";
 };
 
