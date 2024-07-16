@@ -5,12 +5,12 @@
 
 /dts-v1/;
 
+#define		ETH_SWITCH_ENABLE  		0
+#define		LVDS_7INCH_PANEL		1
+
 #include "myb-stm32mp257x-base.dtsi"
 #include "myb-stm32mp257x-resmem-1g.dtsi"
 #include "myb-stm32mp257x-ethswitch.dtsi"
-
-#define		ETH_SWITCH_ENABLE  		0
-#define		LVDS_7INCH_PANEL		1
 
 
 / {

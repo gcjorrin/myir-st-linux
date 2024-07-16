@@ -5,15 +5,17 @@
 
 /dts-v1/;
 
+#define		LVDS_7INCH_PANEL		1
+#define		ETH_SWITCH_ENABLE  		0
+
+
 #include "myb-stm32mp257x-base.dtsi"
 #include "myb-stm32mp257x-resmem.dtsi"
 #include "myb-stm32mp257x-ethswitch.dtsi"
 
-#define		ETH_SWITCH_ENABLE  		0
-#define		LVDS_7INCH_PANEL		1
 
 / {
-	model = "MYiR STM32MP257x Evaluation Board";
+	model = "MYiR STM32MP257x Evaluation Board 2";
 	compatible = "st,stm32mp257f-ev1-ca35tdcid-ostl", "st,stm32mp257f-ev1", "st,stm32mp257";
 
 	chosen {
