@@ -10,7 +10,7 @@
 
 
 #include "myb-stm32mp257x-base.dtsi"
-#include "myb-stm32mp257x-resmem.dtsi"
+#include "myb-stm32mp257x-2GB-resmem.dtsi"
 #include "myb-stm32mp257x-ethswitch.dtsi"
 
 
