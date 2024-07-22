@@ -28,6 +28,8 @@
 	snps,ext-systime;
 
 #if (ETH_SWITCH_ENABLE)	
+	pinctrl-0 = <&eth1_mdio_pins_a>;
+	pinctrl-names = "default";
 	fixed_link: fixed-link {
 		speed = <1000>;
 		full-duplex;
