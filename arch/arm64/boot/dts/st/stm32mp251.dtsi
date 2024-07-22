@@ -258,7 +258,7 @@
 
 			trips {
 				cpu0_crit {
-					temperature = <95000>;
+					temperature = <125000>;
 					hysteresis = <1000>;
 					type = "critical";
 				};
@@ -272,7 +272,7 @@
 
 			trips {
 				cpu1_crit {
-					temperature = <95000>;
+					temperature = <125000>;
 					hysteresis = <1000>;
 					type = "critical";
 				};
