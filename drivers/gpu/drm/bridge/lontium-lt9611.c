@@ -58,8 +58,6 @@ struct lt9611 {
 	struct drm_bridge bridge;
 	struct drm_connector connector;
 	struct regmap *regmap;
-	struct mipi_dsi_device *dsi0;
-	struct mipi_dsi_device *dsi1;
 	struct platform_device *audio_pdev;
 	bool ac_mode;
 	struct gpio_desc *reset_gpio;
@@ -870,7 +868,7 @@ static enum drm_mode_status lt9611_bridge_mode_valid(struct drm_bridge *bridge,
 
 	if (!lt9611_mode)
 		return MODE_BAD;
-	else if (lt9611_mode->intfs > 1 && !lt9611->dsi1)
+	else if (lt9611_mode->intfs > 1)
 		return MODE_PANEL;
 	else
 		return MODE_OK;
@@ -1180,9 +1178,8 @@ static irqreturn_t lt9611_irq_thread_handler(int irq, void *dev_id)
 
 		regmap_write(lt9611->regmap, 0x8207, 0x7f);
 		regmap_write(lt9611->regmap, 0x8207, 0x3f);
-		if(!lt9611->dsi0)
-			//lt9611->dsi0 = lt9611_attach_dsi(lt9611, lt9611->dsi0_node);
-			lt9611->dsi0 = lt9611_attach_dsi(lt9611);
+		if(!lt9611->dsi)
+			lt9611->dsi = lt9611_attach_dsi(lt9611);
 	}
 
 	if (irq_flag3 & 0xc0 && lt9611->bridge.dev)
@@ -1270,9 +1267,9 @@ static int lt9611_probe(struct i2c_client *client,
 	drm_bridge_add(&lt9611->bridge);
 
 	/* Attach primary DSI */
-	lt9611->dsi0 = lt9611_attach_dsi(lt9611);
-	if (IS_ERR(lt9611->dsi0)) {
-		ret = PTR_ERR(lt9611->dsi0);
+	lt9611->dsi = lt9611_attach_dsi(lt9611);
+	if (IS_ERR(lt9611->dsi)) {
+		ret = PTR_ERR(lt9611->dsi);
 		goto err_remove_bridge;
 	}
 
