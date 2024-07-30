@@ -1467,7 +1467,7 @@ export TARGET_ARM32=y
 stdtstree := $(dtstree)
 else ifeq ("$(SRCARCH)", "arm64")
 export TARGET_ARM64=y
-stdtstree := $(dtstree)/st
+stdtstree := $(dtstree)/myir
 endif
 
 # Default path for external device trees
