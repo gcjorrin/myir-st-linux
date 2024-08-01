@@ -107,7 +107,7 @@ struct stm32_dwmac {
 	u32 speed;
 	const struct stm32_ops *ops;
 	struct device *dev;
-	struct gpio_desc *phy_reset[2];
+	struct gpio_desc *phy_reset[4];
 };
 
 struct stm32_syscfg_pmcsetr {
@@ -494,17 +494,18 @@ static int stm32_dwmac_phy_reset(struct device *dev, struct stm32_dwmac *dwmac)
         of_property_read_u32(dev->of_node, "st,reset-assert-us", &reset_delay_us);
         of_property_read_u32(dev->of_node, "st,reset-deassert-us", &reset_deassert_us);
         of_property_read_u32(dev->of_node, "st,num_reset_gpios", &num_reset_gpios);
+	num_reset_gpios = num_reset_gpios > 4 ? 4 : num_reset_gpios;
 
 		do{
 			dwmac->phy_reset[i] = devm_gpiod_get_index(dev, "st,phy-reset",i,GPIOD_OUT_HIGH);
             if(!IS_ERR(dwmac->phy_reset[i]))
             {
-				gpiod_direction_output(dwmac->phy_reset[i], GPIOD_OUT_HIGH);
-				gpiod_set_value_cansleep(dwmac->phy_reset[i], GPIOD_OUT_HIGH);
+				gpiod_direction_output(dwmac->phy_reset[i], 1);
+				gpiod_set_value_cansleep(dwmac->phy_reset[i],1);
 				usleep_range(reset_deassert_us, reset_deassert_us);
-				gpiod_set_value_cansleep(dwmac->phy_reset[i], GPIOD_OUT_LOW);
+				gpiod_set_value_cansleep(dwmac->phy_reset[i], 0);
 				usleep_range(reset_delay_us, reset_delay_us);
-				gpiod_set_value_cansleep(dwmac->phy_reset[i], GPIOD_OUT_HIGH);
+				gpiod_set_value_cansleep(dwmac->phy_reset[i], 1);
 				dev_info(dev, "reset eth-phy \n");
             }
 			i++;
