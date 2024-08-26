@@ -34,6 +34,7 @@
 	st,reset-deassert-us = <15000>;
 
 #if (ETH_SWITCH_ENABLE)	
+	eth_switch = <1>;
 	pinctrl-0 = <&eth1_mdio_pins_a>;
 	pinctrl-names = "default";
 	fixed_link: fixed-link {
@@ -75,6 +76,7 @@
 	st,eth-ptp-from-rcc;
 	st,ext-phyclk = <&clk_ext_phy2>;
 
+	st,num_reset_gpios = <1>;
 	st,phy-reset-gpios =  <&gpiob 2 GPIO_ACTIVE_HIGH>;
 	st,reset-assert-us = <15000>;
 	st,reset-deassert-us = <15000>;

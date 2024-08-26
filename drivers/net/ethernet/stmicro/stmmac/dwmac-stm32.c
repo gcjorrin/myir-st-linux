@@ -489,27 +489,33 @@ static int phy_power_on(struct stm32_dwmac *bsp_priv, bool enable)
 
 static int stm32_dwmac_phy_reset(struct device *dev, struct stm32_dwmac *dwmac)
 {		int i=0;
-        int reset_delay_us=0,reset_deassert_us=0,num_reset_gpios=0;
+        int reset_delay_us=0,reset_deassert_us=0,num_reset_gpios=0,eth_switch=0;
 
         of_property_read_u32(dev->of_node, "st,reset-assert-us", &reset_delay_us);
         of_property_read_u32(dev->of_node, "st,reset-deassert-us", &reset_deassert_us);
         of_property_read_u32(dev->of_node, "st,num_reset_gpios", &num_reset_gpios);
 	num_reset_gpios = num_reset_gpios > 4 ? 4 : num_reset_gpios;
 
-		do{
-			dwmac->phy_reset[i] = devm_gpiod_get_index(dev, "st,phy-reset",i,GPIOD_OUT_HIGH);
-            if(!IS_ERR(dwmac->phy_reset[i]))
-            {
-				gpiod_direction_output(dwmac->phy_reset[i], 1);
-				gpiod_set_value_cansleep(dwmac->phy_reset[i],1);
+	of_property_read_u32(dev->of_node, "eth_switch", &eth_switch);
+	num_reset_gpios = num_reset_gpios > 4 ? 4 : num_reset_gpios;
+	do{
+		dwmac->phy_reset[i] = devm_gpiod_get_index(dev, "st,phy-reset",i,1);
+		if(!IS_ERR(dwmac->phy_reset[i]))
+		{
+			gpiod_direction_output(dwmac->phy_reset[i], 1);
+			gpiod_set_value_cansleep(dwmac->phy_reset[i], 1);
+			if(eth_switch<=0)
+			{
 				usleep_range(reset_deassert_us, reset_deassert_us);
 				gpiod_set_value_cansleep(dwmac->phy_reset[i], 0);
 				usleep_range(reset_delay_us, reset_delay_us);
 				gpiod_set_value_cansleep(dwmac->phy_reset[i], 1);
-				dev_info(dev, "reset eth-phy \n");
-            }
-			i++;
-		}while(i<num_reset_gpios);
+
+			}
+			dev_info(dev, "reset eth-phy \n");
+		}
+		i++;
+	}while(i<num_reset_gpios);
 
         return 1;
 }
