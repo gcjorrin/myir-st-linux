@@ -558,7 +558,7 @@ static int stm32_dwmac_probe(struct platform_device *pdev)
 		goto err_remove_config_dt;
 	}
 
-	stm32_dwmac_phy_reset(&pdev->dev, dwmac);
+	//stm32_dwmac_phy_reset(&pdev->dev, dwmac);
 
 	if (stmmac_res.wol_irq && !dwmac->clk_eth_ck) {
 		ret = stm32_dwmac_wake_init(&pdev->dev, &stmmac_res);
